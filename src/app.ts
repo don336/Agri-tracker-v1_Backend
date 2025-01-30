@@ -7,6 +7,7 @@ import routes from './routes/index';
 
 connection();
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(errors());

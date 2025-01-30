@@ -6,23 +6,17 @@ import { Request, Response } from 'express';
 
 class UserController {
   static async SignUp(req: Request, res: Response): Promise<Response | void> {
-    const { name, username, email, password } = req.body;
-
-    if (!name || !username || !email || !password) {
-      return res.status(422).json({
-        message: 'All Fields are required',
-      });
-    }
+    const { firstName, email, lastName, phone, password } = req.body;
+    console.log(req.body, '=========>');
+    // if (firstName || email || lastName || phone || password) {
+    //   return res.status(422).json({
+    //     message: 'All Fields are required',
+    //   });
+    // }
 
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
       return res.status(409).json({ message: 'Email has been taken' });
-    }
-
-    const existingUsername = await User.findOne({ username });
-
-    if (existingUsername) {
-      return res.status(409).json({ message: 'Username has been taken' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -31,17 +25,21 @@ class UserController {
     try {
       const user = await User.create({
         userId: uuidv4,
-        name,
-        username,
+        firstName,
         email,
+        lastName,
+        phone,
         password: encryptedPwd,
       });
 
       const accessToken = await Jwt.sign(
         {
           userId: user.userId,
-          name: user.name,
+          firstName: user.firstName,
           email: user.email,
+          lastName: user.lastName,
+          phone: user.phone,
+          password,
         },
         process.env.JWT_SECRET as string,
         { expiresIn: '1d' }
@@ -51,9 +49,10 @@ class UserController {
         message: 'User created successfully',
         user: {
           id: user._id,
-          name: user.name,
-          username: user.username,
+          firstName: user.firstName,
           email: user.email,
+          lastName: user.lastName,
+          phone: user.phone,
         },
         accessToken,
       });
@@ -93,9 +92,10 @@ class UserController {
       const accessToken = await Jwt.sign(
         {
           _id: existingUser._id,
-          name: existingUser.name,
+          firstName: existingUser.firstName,
           email: existingUser.email,
-          username: existingUser.username,
+          lastName: existingUser.lastName,
+          phone: existingUser.phone,
         },
         process.env.JWT_SECRET as string
       );
@@ -104,13 +104,13 @@ class UserController {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
 
-      const { username } = existingUser;
+      const { firstName } = existingUser;
 
       return res.status(201).json({
         message: "You're logged in",
         accessToken,
         user: {
-          username,
+          firstName,
           email,
         },
       });
