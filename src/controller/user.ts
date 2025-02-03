@@ -5,14 +5,43 @@ import User from '../models/User';
 import { Request, Response } from 'express';
 
 class UserController {
+  static async Profiles(req: Request, res: Response): Promise<Response | void> {
+    const users = await User.find();
+    res.status(200).json({
+      message: 'All Users',
+      users,
+    });
+  }
+  static async Profile(req: Request, res: Response): Promise<Response | void> {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(422).json({
+        message: 'User ID is required',
+      });
+    }
+
+    const user = await User.findOne({ userId: id });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      message: 'User found',
+      user,
+    });
+  }
   static async SignUp(req: Request, res: Response): Promise<Response | void> {
     const { firstName, email, lastName, phone, password } = req.body;
-    console.log(req.body, '=========>');
-    // if (firstName || email || lastName || phone || password) {
-    //   return res.status(422).json({
-    //     message: 'All Fields are required',
-    //   });
-    // }
+
+    if (!firstName || !email || !lastName || !phone || !password) {
+      return res.status(422).json({
+        message: 'All Fields are required',
+      });
+    }
 
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
@@ -23,14 +52,17 @@ class UserController {
     const encryptedPwd = await bcrypt.hash(password, salt);
 
     try {
-      const user = await User.create({
-        userId: uuidv4,
+      const createUser = {
+        userId: uuidv4(),
         firstName,
         email,
         lastName,
         phone,
         password: encryptedPwd,
-      });
+      };
+
+      console.log(createUser);
+      const user = await User.create(createUser);
 
       const accessToken = await Jwt.sign(
         {
@@ -48,7 +80,7 @@ class UserController {
       return res.status(201).json({
         message: 'User created successfully',
         user: {
-          id: user._id,
+          id: user.userId,
           firstName: user.firstName,
           email: user.email,
           lastName: user.lastName,
@@ -91,7 +123,7 @@ class UserController {
 
       const accessToken = await Jwt.sign(
         {
-          _id: existingUser._id,
+          userId: existingUser.userId,
           firstName: existingUser.firstName,
           email: existingUser.email,
           lastName: existingUser.lastName,
@@ -104,12 +136,13 @@ class UserController {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
 
-      const { firstName } = existingUser;
+      const { firstName, userId } = existingUser;
 
       return res.status(201).json({
         message: "You're logged in",
         accessToken,
         user: {
+          userId,
           firstName,
           email,
         },
@@ -117,6 +150,85 @@ class UserController {
     } catch (error) {
       return res.status(500).json({
         message: 'server error',
+      });
+    }
+  }
+
+  static async UpdateUser(
+    req: Request,
+    res: Response
+  ): Promise<Response | void> {
+    const { firstName, email, lastName, phone, password } = req.body;
+    const { id } = req.params;
+
+    const existingUser = await User.findOne({ userId: id });
+
+    if (!existingUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (firstName && email && lastName && phone && password) {
+      return res.status(422).json({ message: 'Atleast one field is required' });
+    }
+
+    let encryptedPwd;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      encryptedPwd = await bcrypt.hash(password, salt);
+    }
+
+    try {
+      const user = await User.findOneAndUpdate(
+        { userId: id },
+        {
+          firstName,
+          email,
+          lastName,
+          phone,
+          password: encryptedPwd, // hash the password before saving it to the database
+        },
+        {
+          new: true,
+        }
+      );
+
+      if (user) {
+        return res.status(200).json({
+          message: 'User updated successfully',
+          user,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+
+  static async DeleteUser(
+    req: Request,
+    res: Response
+  ): Promise<Response | void> {
+    const { id } = req.params;
+
+    const existingUser = await User.findOne({ userId: id });
+
+    if (!existingUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    try {
+      const user = await User.findOneAndDelete({ userId: id });
+
+      if (user) {
+        return res.status(200).json({
+          message: 'User deleted successfully',
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }

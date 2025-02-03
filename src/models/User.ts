@@ -1,11 +1,10 @@
 import { model, Schema } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 import { IUser } from '../Types/index';
+
 const userSchema = new Schema<IUser>({
   userId: {
     type: String,
-    default: uuidv4,
-    immutable: true, // Ensures it cannot be modified after creation
+    required: true,
   },
   firstName: {
     type: String,
