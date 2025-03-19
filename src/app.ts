@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-
+import cookieparser from 'cookie-parser';
 import cors from 'cors';
 import { errors } from 'celebrate';
 import connection from './db_connection/mongoose';
@@ -9,6 +9,8 @@ connection();
 const app = express();
 
 app.use(cors());
+app.use(cookieparser());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(errors());
 app.use(routes);

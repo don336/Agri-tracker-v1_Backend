@@ -9,3 +9,13 @@ export interface IUser extends Document {
   password: string;
   dateCreated: Date;
 }
+
+export interface ICrop extends Document {
+  name: string;
+  variety: string;
+  plantingDate: Date;
+  harvestDate: Date;
+  quantity: number;
+  status: string;
+  notes: string;
+}

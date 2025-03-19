@@ -9,19 +9,19 @@ const cropSchema = new Schema(
     },
     name: {
       type: String,
-      required: [true, 'Crop name is required'],
+      required: true,
     },
     variety: {
       type: String,
-      required: [true, 'Variety is required'],
+      required: true,
     },
     plantingDate: {
       type: Date,
-      required: [true, 'Planting date is required'],
+      required: true,
     },
     harvestDate: {
       type: Date,
-      required: [true, 'Harvest date is required'],
+      required: true,
     },
     fieldId: {
       type: Schema.Types.ObjectId,
@@ -30,7 +30,7 @@ const cropSchema = new Schema(
     },
     quantity: {
       type: Number,
-      required: [true, 'Quantity is required'],
+      required: true,
       min: [0, 'Quantity cannot be negative'],
     },
     status: {

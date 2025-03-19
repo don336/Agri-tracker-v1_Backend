@@ -5,32 +5,30 @@ import { IUser } from '../Types';
 export interface AuthRequest extends Request {
   user?: JwtPayload | IUser;
 }
+
 const checkAuth = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ): void => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(' ')[1] || '';
+  const token = req.cookies.token;
 
   if (!token) {
-    res.status(401).json({ message: 'Authentication failed!' });
+    res.status(401).json({ msg: 'Auth Denied!' });
   }
 
   try {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
-    }
-
-    const decodedToken = jwt.verify(token, secret) as JwtPayload;
-    req.user = decodedToken;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || ''
+    ) as JwtPayload;
+    req.user = decoded;
     next();
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(401).json({ message: error.message });
-    }
-    res.status(401).json({ message: 'Authentication failed!' });
+    res.status(401).json({
+      message:
+        error instanceof Error ? error.message : 'Authentication failed!',
+    });
   }
 };
 
