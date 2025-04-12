@@ -11,7 +11,9 @@ const checkAuth = (
   res: Response,
   next: NextFunction
 ): void => {
-  const token = req.cookies.token;
+  const token = req.cookies['token'] || req.headers['authorization'];
+
+  // console.log(token, 'token ====================>');
 
   if (!token) {
     res.status(401).json({ msg: 'Auth Denied!' });

@@ -132,9 +132,7 @@ class UserController {
         process.env.JWT_SECRET as string
       );
 
-      res.cookie('token', accessToken, {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      });
+      res.cookie('token', accessToken, { httpOnly: true });
 
       const { firstName, userId } = existingUser;
 

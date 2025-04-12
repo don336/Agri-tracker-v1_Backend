@@ -1,12 +1,8 @@
 import { model, Schema } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 
 const cropSchema = new Schema(
   {
-    cropId: {
-      type: String,
-      default: uuidv4,
-    },
+    _id: { type: String, required: true },
     name: {
       type: String,
       required: true,
@@ -17,18 +13,24 @@ const cropSchema = new Schema(
     },
     plantingDate: {
       type: Date,
+      format: 'YYYY-MM-DD',
       required: true,
     },
     harvestDate: {
       type: Date,
+      format: 'YYYY-MM-DD',
       required: true,
     },
-    fieldId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Field',
-      required: false,
+    fieldName: {
+      type: String,
+      required: true,
     },
     quantity: {
+      type: Number,
+      required: true,
+      min: [0, 'Quantity cannot be negative'],
+    },
+    area: {
       type: Number,
       required: true,
       min: [0, 'Quantity cannot be negative'],
@@ -36,7 +38,13 @@ const cropSchema = new Schema(
     status: {
       type: String,
       enum: {
-        values: ['growing', 'harvested'],
+        values: [
+          'Planned',
+          'Planted',
+          'Growing',
+          'Ready to Harvest',
+          'Harvested',
+        ],
         message: 'Status must be either "growing" or "harvested"',
       },
       default: 'growing',

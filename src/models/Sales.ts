@@ -2,20 +2,24 @@ import { model, Schema } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 const salesSchema = new Schema({
-  saleId: {
+  _id: {
     type: String,
     default: uuidv4,
-  },
-
-  crop: {
-    type: Schema.Types.ObjectId,
-    ref: 'Crop',
     required: true,
   },
 
-  saleDate: {
-    type: Date,
-    default: Date.now,
+  crop_name: {
+    type: String,
+    required: true,
+  },
+
+  customer_name: {
+    type: String,
+    required: true,
+  },
+  customer_contact: {
+    type: String,
+    required: true,
   },
 
   quantity: {
@@ -24,24 +28,28 @@ const salesSchema = new Schema({
     min: 0,
   },
 
-  pricePerUnit: {
+  unit_price: {
     type: Number,
     required: true,
     min: 0,
   },
 
-  totalRevenue: {
+  total_price: {
     type: Number,
     required: true,
     min: 0,
   },
 
-  buyer: {
-    type: String,
+  sale_date: {
+    type: Date,
     required: true,
     trim: true,
   },
 
+  payment_method: {
+    type: String,
+    trim: true,
+  },
   notes: {
     type: String,
     trim: true,
@@ -50,8 +58,8 @@ const salesSchema = new Schema({
 
 // Virtual field to auto-calculate `totalRevenue` if not provided
 salesSchema.pre('save', function (next) {
-  if (!this.totalRevenue) {
-    this.totalRevenue = this.quantity * this.pricePerUnit;
+  if (!this.total_price) {
+    this.total_price = this.quantity * this.unit_price;
   }
   next();
 });

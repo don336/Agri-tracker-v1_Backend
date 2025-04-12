@@ -8,14 +8,21 @@ const cropRoute: Router = Router();
 cropRoute.get('/', checkAuth, (req: Request, res: Response) => {
   CropController.getCrops(req, res);
 });
+cropRoute.get('/:id', checkAuth, (req: Request, res: Response) => {
+  CropController.getCrop(req, res);
+});
 cropRoute.post('/add-crop', checkAuth, (req: Request, res: Response) => {
   CropController.createCrop(req, res);
 });
-cropRoute.get('/update-crop', checkAuth, (req: Request, res: Response) => {
+cropRoute.put('/update-crop/:id', checkAuth, (req: Request, res: Response) => {
   CropController.updateCrop(req, res);
 });
-cropRoute.get('/delete-crop', checkAuth, (req: Request, res: Response) => {
-  CropController.deleteCrop(req, res);
-});
+cropRoute.delete(
+  '/delete-crop/:id',
+  checkAuth,
+  (req: Request, res: Response) => {
+    CropController.deleteCrop(req, res);
+  }
+);
 
 export default cropRoute;
