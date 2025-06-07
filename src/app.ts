@@ -1,14 +1,27 @@
 import express, { Request, Response } from 'express';
-
+import cookieparser from 'cookie-parser';
 import cors from 'cors';
 import { errors } from 'celebrate';
 import connection from './db_connection/mongoose';
+import compression from 'compression';
+import bodyParser from 'body-parser';
+import routes from './routes/index';
 
 connection();
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    credentials: true,
+  })
+);
+app.use(compression());
+app.use(bodyParser.json());
+app.use(cookieparser());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(errors());
+app.use(routes);
 
 app.get('/', (req: Request, res: Response) => {
   res.status(200).send('Home');
